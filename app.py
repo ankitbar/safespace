@@ -5,6 +5,7 @@ import os
 import sqlite3
 from flask_sqlalchemy import SQLAlchemy
 import boto3
+import smtplib
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -13,6 +14,7 @@ app.secret_key = 'your_secret_key'
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'mp4'}
+SENDER_EMAIL = 'ankit.baraskar1@gmail.com'
 
 # Create a SQLite database connection
 conn = sqlite3.connect('users.db',check_same_thread=False)
@@ -70,9 +72,14 @@ shared_files = db.Table('shared_files',
 db.create_all()
 
 # Helper functions
-def send_email(receiver_email, subject, message):
+def send_email(receiver_email, subject, message,sender_email = SENDER_EMAIL):
     # Code to send email request to receiver_email
-    pass
+    try:
+        smtpObj = smtplib.SMTP('localhost')
+        smtpObj.sendmail(sender_email, receiver_email, message)         
+        print("Successfully sent email")
+    except SMTPException:
+        pass
 
 def authenticate_file_access_request(requester, file_owner, file_name):
     receiver_email = file_owner.username  # Assume email address is the same as username
