@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Welcome, {{ current_user.username }}!</h1>
+    <h2>Create New Folder</h2>
+    <form method="POST" action="{{ url_for('create_folder') }}">
+        {{ form.csrf_token }}
+        <div>
+            <label for="folder_name">Folder Name:</label>
+            <input type="text" id="folder_name" name="folder_name" required>
+            <input type="submit" value="Create Folder">
+        </div>
+    </form>
+
+    <h2>Existing Folders</h2>
+    <ul>
+        {% for folder in folders %}
+            <li>
+                <a href="{{ url_for('view_folder', folder_id=folder.id) }}">{{ folder.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Create Shared Folder</h2>
+    <form method="POST" action="{{ url_for('create_shared_folder') }}">
+        {{ form.csrf_token }}
+        <div>
+            <label for="shared_folder_name">Folder Name:</label>
+            <input type="text" id="shared_folder_name" name="shared_folder_name" required>
+        </div>
+        <div>
+            <label for="shared_with_email">Share with Email:</label>
+            <input type="email" id="shared_with_email" name="shared_with_email" required>
+        </div>
+        <div>
+            <input type="submit" value="Create Shared Folder">
+        </div>
+    </form>
+</body>
+</html>
