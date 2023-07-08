@@ -39,5 +39,12 @@
             <input type="submit" value="Create Shared Folder">
         </div>
     </form>
+
+    <h2>Logout</h2>
+    <!-- Logout Button -->
+    <form action="{{ url_for('logout') }}" method="POST">
+        {{ form.csrf_token }}
+        <button type="submit">Logout</button>
+    </form>
 </body>
 </html>

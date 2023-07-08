@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -12,6 +13,8 @@ app.secret_key = 'your_secret_key'
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+DATA_PATH = 'data'
+SHARED_PATH = 'shared'
 class User:
     def __init__(self, username, password):
         self.username = username
@@ -22,7 +25,7 @@ class User:
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+
     @property
     def is_authenticated(self):
         return True
@@ -45,24 +48,20 @@ def load_user(username):
         return User(username='user2', password='password2')
     return None
 
-# Define LoginForm class
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Log In')
 
-# Define CreateFolderForm class
 class CreateFolderForm(FlaskForm):
     folder_name = StringField('Folder Name', validators=[DataRequired()])
     submit = SubmitField('Create Folder')
 
-# Define CreateSharedFolderForm class
 class CreateSharedFolderForm(FlaskForm):
     shared_folder_name = StringField('Folder Name', validators=[DataRequired()])
     shared_with_email = StringField('Share with Email', validators=[DataRequired()])
     submit = SubmitField('Create Shared Folder')
 
-# Routes and view functions
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -101,10 +100,43 @@ def home():
 
     folders = []  # Placeholder for retrieving existing folders
 
-    return render_template('home.html', create_folder_form=create_folder_form,
-                           create_shared_folder_form=create_shared_folder_form, folders=folders)
+    return render_template('home.html',
+                           create_folder_form=create_folder_form,
+                           create_shared_folder_form=create_shared_folder_form,
+                           folders=folders,
+                           form = create_folder_form)
 
-@app.route('/logout')
+@app.route('/create_folder', methods=['POST'])
+@login_required
+def create_folder():
+    folder_name = request.form['folder_name']
+    folder_path = os.path.join(DATA_PATH, folder_name)
+    
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        flash(f'Folder "{folder_name}" created successfully.')
+    else:
+        flash(f'Folder "{folder_name}" already exists.')
+
+    return redirect(url_for('home'))
+
+@app.route('/create_shared_folder', methods=['POST'])
+@login_required
+def create_shared_folder():
+    shared_folder_name = request.form['shared_folder_name']
+    shared_with_email = request.form['shared_with_email']
+    folder_path = os.path.join(SHARED_PATH, shared_folder_name)
+    
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        flash(f'Shared folder "{shared_folder_name}" created and shared with {shared_with_email}.')
+        # Logic to send email notification to shared_with_email
+    else:
+        flash(f'Folder "{shared_folder_name}" already exists.')
+
+    return redirect(url_for('home'))
+
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()

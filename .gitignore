@@ -154,6 +154,8 @@ cython_debug/
 
 # Folders
 meta/
+data/
+shared/
 
 # Databases
 *.db
