@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Folder: {{ folder_name }}</title>
+</head>
+<body>
+    <h1>Folder: {{ folder_name }}</h1>
+    
+    <h2>Files in this folder</h2>
+    <ul>
+        {% for file in files %}
+            <li>
+                <a href="{{ url_for('view_file', file_name=file) }}">{{ file }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Subfolders</h2>
+    <ul>
+        {% for folder in folders %}
+            <li>
+                <a href="{{ url_for('view_folder', folder_name=folder) }}">{{ folder }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Back to Home</h2>
+    <a href="{{ url_for('home') }}">Go back to Home</a>
+</body>
+</html>

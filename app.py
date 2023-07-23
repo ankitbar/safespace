@@ -13,7 +13,7 @@ app.secret_key = 'your_secret_key'
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-DATA_PATH = 'data'
+PATH_TO_USER_FILES = 'data'
 SHARED_PATH = 'shared'
 class User:
     def __init__(self, username, password):
@@ -98,19 +98,26 @@ def home():
         # Logic to create a new shared folder and send notification to the specified email
         flash(f'Shared folder "{shared_folder_name}" created and shared with {shared_with_email}.')
 
-    folders = []  # Placeholder for retrieving existing folders
+    # Retrieve the list of files and folders accessible to the current user
+    user_file_path = os.path.join(PATH_TO_USER_FILES, current_user.username)
+
+    if not(os.path.exists(user_file_path)):
+        os.makedirs(user_file_path)
+
+    files_and_folders = os.listdir(user_file_path)
+    files = [f for f in files_and_folders if os.path.isfile(os.path.join(user_file_path, f))]
+    folders = [f for f in files_and_folders if os.path.isdir(os.path.join(user_file_path, f))]
 
     return render_template('home.html',
                            create_folder_form=create_folder_form,
                            create_shared_folder_form=create_shared_folder_form,
-                           folders=folders,
-                           form = create_folder_form)
+                           folders=folders,files = files)
 
 @app.route('/create_folder', methods=['POST'])
 @login_required
 def create_folder():
     folder_name = request.form['folder_name']
-    folder_path = os.path.join(DATA_PATH, folder_name)
+    folder_path = os.path.join(PATH_TO_USER_FILES, current_user.username, folder_name)
     
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -125,7 +132,7 @@ def create_folder():
 def create_shared_folder():
     shared_folder_name = request.form['shared_folder_name']
     shared_with_email = request.form['shared_with_email']
-    folder_path = os.path.join(SHARED_PATH, shared_folder_name)
+    folder_path = os.path.join(SHARED_PATH, current_user.username, shared_folder_name)
     
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -135,6 +142,25 @@ def create_shared_folder():
         flash(f'Folder "{shared_folder_name}" already exists.')
 
     return redirect(url_for('home'))
+
+
+@app.route('/view_folder/<folder_name>', methods=['GET'])
+@login_required
+def view_folder(folder_name):
+    user_file_path = os.path.join('path_to_user_files', current_user.username, folder_name)
+    files_and_folders = os.listdir(user_file_path)
+    files = [f for f in files_and_folders if os.path.isfile(os.path.join(user_file_path, f))]
+    folders = [f for f in files_and_folders if os.path.isdir(os.path.join(user_file_path, f))]
+    return render_template('folder_view.html', folder_name=folder_name, folders=folders, files=files)
+
+@app.route('/view_file/<file_name>', methods=['GET'])
+@login_required
+def view_file(file_name):
+    file_path = os.path.join('path_to_user_files', current_user.username, file_name)
+    # You can customize how you want to display the file content
+    # For example, for text files, you can read the content and pass it to the template
+    # For images and videos, you can use appropriate HTML elements to render them in the template
+    return render_template('file_view.html', file_name=file_name)
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required

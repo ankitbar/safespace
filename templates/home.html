@@ -19,7 +19,16 @@
     <ul>
         {% for folder in folders %}
             <li>
-                <a href="{{ url_for('view_folder', folder_id=folder.id) }}">{{ folder.name }}</a>
+                <a href="{{ url_for('view_folder', folder_name=folder) }}">{{ folder }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Files</h2>
+    <ul>
+        {% for file in files %}
+            <li>
+                <a href="{{ url_for('view_file', file_name=file) }}">{{ file }}</a>
             </li>
         {% endfor %}
     </ul>
